@@ -43,3 +43,4 @@ if __name__=='__main__':
    # print(os.path.abspath('..'))
 #    print(train_and_get_metrics('../data/train/train.csv'))
    print(train_and_get_metrics('/Users/chenyuqin/Desktop/21_fall_codes_and_relative/dsci551/project/data/train/train.csv'))
+
