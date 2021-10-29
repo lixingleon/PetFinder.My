@@ -1,8 +1,11 @@
 package com.example.demo.Controller;
 
+import com.example.demo.Exception.TrainDataEmptyNameException;
 import com.example.demo.Model.TrainData;
-import com.example.demo.TrainDataService.TrainDataService;
+import com.example.demo.Service.TrainDataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,10 +27,22 @@ public class TrainDataController {
     }
 
     @PostMapping
-    public String getTrainResult(@RequestBody TrainData response){
-        TrainData trainData= trainDataService.getTrainDataByName(response.getName());
-        System.out.println(trainData.getId());
-        String result = trainDataService.train(trainData);
-        return result;
+    public ResponseEntity<String> uploadTrainData(@RequestBody TrainData trainData){
+        try{
+            TrainData uploadedTrainData = trainDataService.addTrainData(trainData);
+            return ResponseEntity.ok("uploadedTrainData"+trainData.toString());
+        }catch(TrainDataEmptyNameException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
+
     }
+
+
+
+
+
+
+
+
 }

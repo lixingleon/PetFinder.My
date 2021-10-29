@@ -1,10 +1,13 @@
 package com.example.demo.dao;
 
 import com.example.demo.Model.TrainData;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 
 import java.util.List;
 
-public interface TrainDataDao {
-    List<TrainData> retrieveAllTrainData();
-    TrainData getTrainDataByName(String name);
+public interface TrainDataDao extends JpaRepository<TrainData, Long> {
+
+    TrainData findByName(String name);
+
 }
