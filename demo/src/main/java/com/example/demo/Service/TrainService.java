@@ -2,36 +2,52 @@ package com.example.demo.Service;
 
 import com.example.demo.Model.TrainData;
 import com.example.demo.dao.TrainDataDao;
+import com.opencsv.CSVReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+
+
 @Service
 public class TrainService {
-    private TrainDataDao trainDataDao;
-    @Autowired
-    public TrainService(TrainDataDao trainDataDao){
-        this.trainDataDao = trainDataDao;
-    }
-    public String train(TrainData response){
-        TrainData trainData= trainDataDao.findByName(response.getName());
-        //利用xgboost训练。
-        String path = trainData.getPath();
-        //训练过程
-        System.out.println("start run python");
-        try {
-            Process proc = Runtime.getRuntime().exec("python ../models_manager/xgboost_.py");
-            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line=null;
-            // Todo: write line to return result, judge if there are multiple lines;
-            while ((line=in.readLine())!=null){
-                System.out.println("Train mse is: "+line);
+    static final String uploadPath = "uploads";
+    public List<String> getMetaData(String name){
+        File file = new File(uploadPath, name);
+        List<String> list = new ArrayList<>();
+        String[] name_split = name.split("\\.");
+        double fileSize = file.length() / (1024.0 * 1024.0);
+        fileSize = Math.floor(fileSize * 100) / 100;
+        list.add(fileSize+"MB");
+        if(name_split[name_split.length-1].equals("csv")){
+
+            //获取file大小，行数，列数，字段名
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(file));
+                CSVReader csvReader = new CSVReader(reader);
+                String[] features = csvReader.readNext();
+                int colNum = features.length;
+                int rowNum = 1;
+                String[] line;
+                while ((line = csvReader.readNext()) != null) {
+                    rowNum++;
+                }
+                list.add(rowNum+" rows");
+                list.add(colNum+" columns");
+                for(String feature: features){
+                    list.add(feature);
+                }
             }
-            proc.waitFor();
-        } catch (Exception e) {return "False";}
-        System.out.println("end run python");
-        //返回训练评估值
-        return "the mse of model is 1.2947489";
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
 }

@@ -1,9 +1,11 @@
 package com.example.demo.Service;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -11,10 +13,7 @@ import com.example.demo.Model.ComposedFile;
 import com.example.demo.Model.FileChunk;
 import com.example.demo.dao.ChunkFileDao;
 import com.example.demo.dao.ComposedFileDao;
-import jnr.ffi.annotations.Out;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -23,8 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Service
 public class FileStorageService {
@@ -116,81 +113,10 @@ public class FileStorageService {
         //存到数据库中
         chunkFileDao.save(chunk);
 
-//
-//        DiskFileItemFactory factory = new DiskFileItemFactory();
-//        //缓冲区大小。文件先写到缓冲区，再写到磁盘
-//        factory.setSizeThreshold(1024);
-//        //缓冲区路径
-//        factory.setRepository(new File(uploadPath));
-//        //解析request的工具类
-//        ServletFileUpload servletFileUpload = new ServletFileUpload(factory);
-//        servletFileUpload.setFileSizeMax(5L*1024L*1024L*1024L);
-//        servletFileUpload.setSizeMax(10L*1024L*1024L*1024L);
-//        //解析后得到一个FileItem类型的List
-//        List<FileItem> fileItems = servletFileUpload.parseRequest(request);
-//        for(FileItem item: fileItems){
-//            System.out.println("first for loop");
-//            if(item.isFormField()){
-//                if("chunk".equals(item.getFieldName())){
-//                    chunkIdx = Integer.parseInt(item.getString(UTF8));
-//                }
-//                if("chunks".equals(item.getFieldName())){
-//                    chunkNum = Integer.parseInt(item.getString(UTF8));
-//                }
-//                if("name".equals(item.getFieldName())){
-//                    name = item.getString(UTF8);
-//                }
-//                if("md5".equals(item.getFieldName())){
-//                    md5 = item.getString(UTF8);
-//                }
-//            }
-//        }
-//        for(FileItem item: fileItems){
-//            System.out.println("second for loop");
-//            //如果这个item不是formfield，而是文件，就写入到临时目录
-//            if(!item.isFormField()){
-//                //chunk文件的名字
-//                String curFileName = name;
-//                //1. 文件名字不为null
-//                if(name!= null){
-//                    //2. 文件的chunkIdx不为null
-//                    if(chunkIdx!= null){
-//                        //3. 更新当前文件chunk的名字
-//                        curFileName = chunkIdx+"_"+name;
-//                    }
-//                    //以当前chunk的名字和路径创建文件
-//                    File curfile = new File(uploadPath, curFileName);
-//                    //如果这个文件已经存在，则不再写入
-//                    if(!curfile.exists()){
-//                        //否则就写入uploads目录.
-//                        //这里是断点续传的核心实现。
-//                        item.write(curfile);
-//                        FileChunk chunk= new FileChunk();
-//                        chunk.setChunkIdx(chunkIdx);
-//                        chunk.setChunkNum(chunkNum);
-//                        chunk.setName(curFileName);
-//                        chunk.setPath(uploadPath);
-//                        chunk.setMd5(md5);
-//                        //存到数据库中
-//                        chunkFileDao.save(chunk);
-//                    }
-//                }
-//
-//            }
-//        }
-//        //至此把当前chunk已经写到临时目录里了。
-//        //如果当前chunk是最后一个chunk，则开始chunk合并工作
-//        if(chunkIdx!= null && chunkIdx == chunkNum-1){
-//
-//
-//        }
-//        response.getWriter().write(""+chunkIdx);
-//        return response;
-
 
 
     }
-    public void orderComposeFile(int chunkNum, String name, String md5) {
+    public void  orderComposeFile(int chunkNum, String name, String md5) {
         //处理流，需要进一步学习记忆关于节点流和处理流的异同和常用IO类
         BufferedOutputStream os = null;
         try{
@@ -222,6 +148,8 @@ public class FileStorageService {
             composedFile.setPath(uploadPath);
             //将composed file 记录保存到数据库
             composedFileDao.save(composedFile);
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -237,5 +165,6 @@ public class FileStorageService {
             }
         }
     }
+
 
 }

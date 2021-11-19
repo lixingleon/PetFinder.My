@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 @CrossOrigin("http://localhost:3000")
 public class FileController {
-    private final static String UTF8 = "utf-8";
+//    private final static String UTF8 = "utf-8";
     private FileStorageService storageService;
     private FileCRUDService fileCRUDService;
     @Autowired
@@ -64,10 +64,6 @@ public class FileController {
     @GetMapping("/api/Files")
     public ResponseEntity<List<ComposedFile>> getComposedFiles(){
         List<ComposedFile> composedFiles = fileCRUDService.getComposedFiles();
-        for(ComposedFile c: composedFiles){
-            System.out.println(c);
-            System.out.println("!!!!!!!!!!!");
-        }
         return ResponseEntity.status(HttpStatus.OK).body(composedFiles);
     }
 //    @PostMapping("/upload")
@@ -104,11 +100,12 @@ public class FileController {
     }
     @RequestMapping(value = "/orderComposeFile", method = RequestMethod.POST)
     @ResponseBody
-    public void orderCompose( @RequestParam("chunks") int chunks,
+    public void  orderCompose( @RequestParam("chunks") int chunks,
                               @RequestParam("name") String name,
                               @RequestParam("md5") String md5
                             ){
         storageService.orderComposeFile(chunks, name, md5);
+
     }
 
 
